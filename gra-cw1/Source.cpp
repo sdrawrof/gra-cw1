@@ -5,7 +5,9 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
-void draw_plane();
+void draw_plane1();
+void draw_plane2();
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods); //closes window when escape key is closed
 
 
@@ -64,9 +66,16 @@ int main() {
 	//create the render loop
 	while (!glfwWindowShouldClose(window))
 	{
-		//doesnt show multiple shapes.. just the one... :(
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		//glPushMatrix();
 
-		draw_plane();
+		//draw_plane1();
+		glRotatef(0.05f, 0, 0.5f, 0);
+		draw_plane1();
+		//glPopMatrix();
+
+		draw_plane2();
 		
 		// restore transformation state
 		glfwSwapBuffers(window); // swaps the front buffer (the one your monitor is currently displaying) and the back buffer(the one you draw on) of the specified window, so that the
@@ -79,11 +88,9 @@ int main() {
 	return 0;
 }
 
-void draw_plane()
+void draw_plane1()
 {
-	glRotatef(0.05f, 0, 0.5f, 0);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW); //sets modelview as the current matrix
 	//glLoadIdentity();
 	glBegin(GL_TRIANGLES);
@@ -111,6 +118,41 @@ void draw_plane()
 	glVertex3f(0, 0.05f, 0);
 	glVertex3f(0, 0, 0.1f);
 	glVertex3f(0.05f, 0, 0);
+
+	glEnd();
+
+}
+
+void draw_plane2()
+{
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glMatrixMode(GL_MODELVIEW); //sets modelview as the current matrix
+	//glLoadIdentity();
+	glBegin(GL_TRIANGLES);
+
+	// Back face A
+	glColor4f(1.0f, 0.0f, 0.0f, 0.5f); // Red !!!!!!!!
+	glVertex3f(0.5f, 0.05f, 0);
+	glVertex3f(0.55f, 0, 0);
+	glVertex3f(0.45f, 0, 0);
+
+	// Bottom face B
+	glColor4f(0.0f, 0.0f, 1.0f, 0.5f); // Blue !!!!!!!!!!!!!!!!!!
+	glVertex3f(0.5f, 0, 0.1f);
+	glVertex3f(0.45f, 0, 0);
+	glVertex3f(0.55f, 0, 0);
+
+	//Left side face C
+	glColor4f(0.0f, 1.0f, 1.0f, 0.5f); // Cyan !!!!!!
+	glVertex3f(0.5f, 0.05f, 0);
+	glVertex3f(0.45f, 0, 0);
+	glVertex3f(0.5f, 0, 0.1f);
+
+	//Right side face D
+	glColor4f(0.0f, 1.0f, 0.0f, 0.5f); // Green !!!!!!!!!!
+	glVertex3f(0.5f, 0.05f, 0);
+	glVertex3f(0.5f, 0, 0.1f);
+	glVertex3f(0.55f, 0, 0);
 
 	glEnd();
 
