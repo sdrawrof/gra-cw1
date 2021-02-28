@@ -16,7 +16,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 
 int main() {
-
+	
 	//intialise GLFW
 	if (!glfwInit()) {
 		std::cout << "GLFW intialisation failed." << std::endl;
@@ -43,10 +43,34 @@ int main() {
 
 	glfwMakeContextCurrent(window);
 
+
+	// Create an array of 3 vectors which represents 3 vertices
+	static const GLfloat g_vertex_buffer_data[] = {
+	   0, 0.05f, 0,
+	   0.05f, 0, 0,
+	   -0.05f, 0, 0,
+	   //0, 0, 0.1f,
+	   //-0.05f, 0, 0,
+	   //0.05f, 0, 0,
+	  // 0, 0.05f, 0,
+	  // -0.05f, 0, 0,
+	   //0, 0, 0.1f,
+	  // 0, 0.05f, 0,
+	  // 0, 0, 0.1f,
+	  // 0.05f, 0, 0
+	};
+
 	//Creates a Vertex Array Object
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
+
+	//create a vertex buffer
+	GLuint vertexbuffer; //create vertexBuffer identifier
+	glGenBuffers(1, &vertexbuffer); //	create vertex buffer, put the resulting identifier in vertexbuffer
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer); //bind buffer to openGL(?)
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW); //// Give our vertices to OpenGL.
+
 
 	glClearColor(0.4f, 0.5f, 0.6f, 1.0f); //this is kept out the render because it only needs to eb called once
 	//glClear() clears buffers
@@ -63,21 +87,7 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
-	// Create an array of 3 vectors which represents 3 vertices
-	static const GLfloat g_vertex_buffer_data[] = {
-	   0, 0.05f, 0,
-	   0.05f, 0, 0,
-	   -0.05f, 0, 0,
-	   0, 0, 0.1f,
-	   -0.05f, 0, 0,
-	   0.05f, 0, 0,
-	   0, 0.05f, 0,
-	   -0.05f, 0, 0,
-	   0, 0, 0.1f,
-	   0, 0.05f, 0,
-	   0, 0, 0.1f,
-	   0.05f, 0, 0
-	};
+	
 
 	//to save computing power, we can enable face culling
 	//The back-face culling prevents the program from rending those objects (e.g. triangles) that face away from the camera.
@@ -85,11 +95,6 @@ int main() {
 	//glFrontFace(GL_CCW);
 	//glCullFace(GL_BACK);
 
-	//create a vertex buffer
-	GLuint vertexbuffer; //create vertexBuffer identifier
-	glGenBuffers(1, &vertexbuffer); //	create vertex buffer, put the resulting identifier in vertexbuffer
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer); //bind buffer to openGL(?)
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW); //// Give our vertices to OpenGL.
 
 	//create a string
 	std::string sequence = "fwfafwf";
@@ -107,14 +112,14 @@ int main() {
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 		glVertexAttribPointer(
 			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			12,                  // size
+			3,                  // size
 			GL_FLOAT,           // type
 			GL_FALSE,           // normalized?
 			0,                  // stride
 			(void*)0            // array buffer offset
 		);
 		// Draw the plane
-		glDrawArrays(GL_TRIANGLES, 0, 12); // Starting from vertex 0; 3 vertices total -> 1 triangle
+		glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total
 		glDisableVertexAttribArray(0);
 		
 		// restore transformation state
