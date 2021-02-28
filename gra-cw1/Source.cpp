@@ -38,40 +38,14 @@ int main() {
 		return -1;
 	}
 
-	glfwSetKeyCallback(window, key_callback);
-
+	//glfwSetKeyCallback(window, key_callback);
 
 	glfwMakeContextCurrent(window);
 
 
-	// Create an array of 3 vectors which represents 3 vertices
-	static const GLfloat g_vertex_buffer_data[] = {
-	   0, 0.05f, 0,
-	   0.05f, 0, 0,
-	   -0.05f, 0, 0,
-	   //0, 0, 0.1f,
-	   //-0.05f, 0, 0,
-	   //0.05f, 0, 0,
-	  // 0, 0.05f, 0,
-	  // -0.05f, 0, 0,
-	   //0, 0, 0.1f,
-	  // 0, 0.05f, 0,
-	  // 0, 0, 0.1f,
-	  // 0.05f, 0, 0
-	};
+	
 
-	//Creates a Vertex Array Object
-	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-
-	//create a vertex buffer
-	GLuint vertexbuffer; //create vertexBuffer identifier
-	glGenBuffers(1, &vertexbuffer); //	create vertex buffer, put the resulting identifier in vertexbuffer
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer); //bind buffer to openGL(?)
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW); //// Give our vertices to OpenGL.
-
-
+	
 	glClearColor(0.4f, 0.5f, 0.6f, 1.0f); //this is kept out the render because it only needs to eb called once
 	//glClear() clears buffers
 
@@ -83,11 +57,39 @@ int main() {
 		std::cout << "GLEW intialisation failed:" << glewGetErrorString(err) << std::endl;
 		return -1;
 	}
+
+	// Create Vertex Array Object
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	// Create a Vertex Buffer Object and copy the vertex data to it
+	GLuint vertexbuffer;
+	glGenBuffers(1, &vertexbuffer);
+
+	// Create an array of 3 vectors which represents 3 vertices
+	static const GLfloat g_vertex_buffer_data[] = {
+	   0, 0.05f, 0,
+	   0.05f, 0, 0,
+	   -0.05f, 0, 0,
+	   0, 0, 0.1f,
+	   -0.05f, 0, 0,
+	  0.05f, 0, 0,
+	  0, 0.05f, 0,
+	  -0.05f, 0, 0,
+	   0, 0, 0.1f,
+	   0, 0.05f, 0,
+	   0, 0, 0.1f,
+	   0.05f, 0, 0
+	};
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
+
 	//enable depth testing
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-
-	
 
 	//to save computing power, we can enable face culling
 	//The back-face culling prevents the program from rending those objects (e.g. triangles) that face away from the camera.
@@ -95,18 +97,13 @@ int main() {
 	//glFrontFace(GL_CCW);
 	//glCullFace(GL_BACK);
 
-
-	//create a string
-	std::string sequence = "fwfafwf";
-
-
-
 	//create the render loop
 	while (!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-		//draw_plane1();
+
+		glRotatef(0.01f, 0.0f, 0.1f, 0.f);
+
 		// 1st attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -119,9 +116,9 @@ int main() {
 			(void*)0            // array buffer offset
 		);
 		// Draw the plane
-		glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total
+		glDrawArrays(GL_TRIANGLES, 0, 12); // Starting from vertex 0; 12 vertices total
 		glDisableVertexAttribArray(0);
-		
+
 		// restore transformation state
 		glfwSwapBuffers(window); // swaps the front buffer (the one your monitor is currently displaying) and the back buffer(the one you draw on) of the specified window, so that the
 			//same buffer is not drawn and displayed at the same time, this eliminates flickering. Also known as double buffering.
