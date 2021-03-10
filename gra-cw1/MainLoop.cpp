@@ -68,14 +68,14 @@ MainLoop::XYZ MainLoop::Plane::calculateDirection() {
 	//normalise (for some resason it wouldnt let me do it in one line, also there must be a way to do this without vec3 but whatever)
 	pDirection = glm::normalize(pDirection);
 
-	//put values in an array since it wont let me diretly access vector elements
-	float directionArray[3] = { 0.0 };
+	//use pointer to access vector elements
 	const float* pSource = (const float*)glm::value_ptr(pDirection);
 
 	std::cout << "direction of plane" << std::endl;
 	std::cout << "X: " << pSource[0] << std::endl;
 	std::cout << "Y: " << pSource[1] << std::endl;
 	std::cout << "Z: " << pSource[2] << std::endl;
+	std::cout << std::endl;
 
 	return XYZ(pSource[0], pSource[1], pSource[2]);
 }
@@ -189,7 +189,7 @@ void MainLoop::handleTransformations(Plane* p) {
 	// do not alter the bLeft, bTop, bRight or point 
 	// member variables.
 	// To do this a custom transform may need to be implemented?
-	p->calculateCentrePoint();
+	//p->calculateCentrePoint();
 }
 
 /* Draws a triangle. */
