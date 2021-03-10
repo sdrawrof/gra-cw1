@@ -4,7 +4,6 @@
 #define GLEW_STATIC
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-
 #include <cmath>
 
 
@@ -15,16 +14,16 @@ class MainLoop {
 
 	// Stores all the information about a point in space
 	class XYZ {
-	  public:
+	public:
 		float x;
 		float y;
 		float z;
-		XYZ(const float x, const float y, const float z); //constructor?
+		XYZ(const float x, const float y, const float z);
 	};
 
 	// Contains all of the information about a plane
 	class Plane {
-	  public:
+	public:
 		static int pIDGenerator; // Generates unique ID for planes
 		const int pID;           // The unique plane ID
 
@@ -34,7 +33,7 @@ class MainLoop {
 		XYZ bLeft;  // back left
 		XYZ bRight; // back right
 		XYZ bTop;   // back top
-		XYZ direction; //direction plane is facing
+		//XYZ direction;
 
 		float xRotate = 0.f; // Stores the amount rotated in x
 		float yRotate = 0.f; // Stores the amount rotated in y
@@ -42,21 +41,21 @@ class MainLoop {
 		float translate = 0.f; // Stores the amount translated forward
 
 		XYZ calculateCentrePoint();
+		//XYZ calculateDirection();
 
 		Plane(const XYZ point, const XYZ bLeft,
-			const XYZ bRight, const XYZ bTop); //Constructor?
+			const XYZ bRight, const XYZ bTop);
 	};
 
-  public:
+public:
 	static int keyPress;						// Stores unhandled key presses
 	static void mainLoop(GLFWwindow* const window); // The main loop function
 
-  private:
+private:
 	static void handleTransformations(Plane* p); // Handles transformations of p
 	static void drawPlane(Plane p);				 // Draws plane p
 
 	// Draws triangle of points p1, p2, p3
-	static void drawTriangle(const XYZ p1, const XYZ p2, const XYZ p3); 
+	static void drawTriangle(const XYZ p1, const XYZ p2, const XYZ p3);
 
-	
 };

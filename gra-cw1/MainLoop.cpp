@@ -1,12 +1,5 @@
 #include "MainLoop.h"
-#include "glm/ext.hpp"
 #include <math.h>
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
-#include "glm/gtx/string_cast.hpp"
-#include <string>
-
-#define GLM_ENABLE_EXPERIMENTAL
 
 /* The program main loop. */
 void MainLoop::mainLoop(GLFWwindow* const window) {
@@ -20,43 +13,6 @@ void MainLoop::mainLoop(GLFWwindow* const window) {
 		XYZ(0.4f, -0.1f, 0.f),
 		XYZ(0.2f, -0.1f, 0.f),
 		XYZ(0.3f, 0.1f, 0.f));
-
-	//calculate centre points
-	p1.centrePoint = p1.calculateCentrePoint(); 
-	p1.centrePoint = p1.calculateCentrePoint();
-
-	//get planes forward direction (refactor/put in method later)
-	glm::vec3 p1Direction = glm::vec3(p1.bTop.x - p1.centrePoint.x, p1.bTop.y - p1.centrePoint.y, p1.bTop.z - p1.centrePoint.z);
-	glm::vec3 p2Direction = glm::vec3(p2.bTop.x - p2.centrePoint.x, p2.bTop.y - p2.centrePoint.y, p2.bTop.z - p2.centrePoint.z);
-	 //normalise (for some resason it wouldnt let me do it in one line)
-	p1Direction = glm::normalize(p1Direction);
-	p2Direction = glm::normalize(p2Direction);
-
-	p1.direction.x = p1Direction[1];
-	p1.direction.y = p1Direction[2];
-	p1.direction.z = p1Direction[3];
-
-	//check it worked
-	//std::cout << "plane 1 direction: " << glm::to_string(p1Direction) << std::endl;
-	//std::cout << "plane 2 direction: " << glm::to_string(p2Direction) << std::endl;
-	std::cout << "X:" << p1.direction.x << std::endl;
-	std::cout << "Y:" <<  p1.direction.y << std::endl;
-	std::cout << "Z:" <<  p1.direction.z << std::endl;
-	std::cout << " " << std::endl;
-
-	//Then put the planes coordinates into a matrix for transformations (point, left, right, top)
-	/*glm::mat4x3 plane1Matrix = glm::mat4x3(
-		glm::vec3(p1.point.x, p1.point.y, p1.point.z),
-		glm::vec3(p1.bLeft.x, p1.bLeft.y, p1.bLeft.z),
-		glm::vec3(p1.bRight.x, p1.bRight.y, p1.bRight.z),
-		glm::vec3(p1.bTop.x, p1.bTop.y, p1.bTop.z));
-
-	glm::mat4x3 plane2Matrix = glm::mat4x3(
-		glm::vec3(p2.point.x, p2.point.y, p2.point.z),
-		glm::vec3(p2.bLeft.x, p2.bLeft.y, p2.bLeft.z),
-		glm::vec3(p2.bRight.x, p2.bRight.y, p2.bRight.z),
-		glm::vec3(p2.bTop.x, p2.bTop.y, p2.bTop.z));*/
-	
 
 	// The main loop
 	while (!glfwWindowShouldClose(window)) {
@@ -93,6 +49,7 @@ MainLoop::XYZ MainLoop::Plane::calculateCentrePoint() {
 	return XYZ(mAverageX, mAverageY, mAverageZ);
 }
 
+
 /* Draws a plane (just a pyramid shape). */
 void MainLoop::drawPlane(Plane p) {
 	glBegin(GL_TRIANGLES);
@@ -107,7 +64,7 @@ void MainLoop::drawPlane(Plane p) {
 	glEnd();
 }
 
-/* Handles transforming planes (rotating, moving) based on key presses. 
+/* Handles transforming planes (rotating, moving) based on key presses.
   Plane is passed in by reference - operations on member variables are
   side effecty.                                                      */
 void MainLoop::handleTransformations(Plane* p) {
@@ -168,33 +125,21 @@ void MainLoop::handleTransformations(Plane* p) {
 		p->translate = 0.f;
 	}
 
-	//these should be replaced with draw function that uses rotation values
-	//glRotatef(p->xRotate, p->centrePoint.x, 0.f, 0.f);
-	//glRotatef(p->yRotate, 0.f, p->centrePoint.y, 0.f);
-	//glRotatef(p->zRotate, 0.f, 0.f, p->centrePoint.z);
-	//glTranslatef(0.0f, 0.0f, p->translate);
-
-	//rotates around direction of plane
-	//glRotatef(p->xRotate, p1Di);
-	//glRotatef(p->yRotate, 0.f, p->centrePoint.y, 0.f);
-	//glRotatef(p->zRotate, 0.f, 0.f, p->centrePoint.z);
-	//glTranslatef(0.0f, 0.0f, p->translate);
+	glRotatef(p->xRotate, p->centrePoint.x, 0.f, 0.f);
+	glRotatef(p->yRotate, 0.f, p->centrePoint.y, 0.f);
+	glRotatef(p->zRotate, 0.f, 0.f, p->centrePoint.z);
+	glTranslatef(0.0f, 0.0f, p->translate);
 
 	// Re-calculates the centre point of the plane
 	// Note this currently does nothing, as the transforms
 	// do not alter the bLeft, bTop, bRight or point 
 	// member variables.
 	// To do this a custom transform may need to be implemented?
-	p->centrePoint = p->calculateCentrePoint(); 
-	
-	//std::cout << "X:" << p->centrePoint.x << std::endl;
-	//std::cout << "Y:" <<  p->centrePoint.y << std::endl;
-	//std::cout << "Z:" <<  p->centrePoint.z << std::endl;
-	//std::cout << " " << std::endl;
+	p->calculateCentrePoint();
 }
 
 /* Draws a triangle. */
-void MainLoop::drawTriangle(XYZ p1, XYZ p2, XYZ p3)  {
+void MainLoop::drawTriangle(XYZ p1, XYZ p2, XYZ p3) {
 	glVertex3f(p1.x, p1.y, p1.z);
 	glVertex3f(p2.x, p2.y, p2.z);
 	glVertex3f(p3.x, p3.y, p3.z);
@@ -204,15 +149,13 @@ void MainLoop::drawTriangle(XYZ p1, XYZ p2, XYZ p3)  {
 
 /* Constructor for XYZ. */
 MainLoop::XYZ::XYZ(const float x, const float y, const float z)
-	: x(x), y(y), z(z) { 
+	: x(x), y(y), z(z) {
 }
 
 /* Constructor for a plane. */
 MainLoop::Plane::Plane(XYZ point, XYZ bLeft,
-	XYZ bRight, XYZ bTop)
-	: point(point), bLeft(bLeft), bRight(bRight), bTop(bTop) ,
+	XYZ bRight, XYZ bTop) :
+	point(point), bLeft(bLeft), bRight(bRight), bTop(bTop),
 	pID(pIDGenerator++), centrePoint(calculateCentrePoint()) {
 
 }
-	
- 

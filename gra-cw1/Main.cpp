@@ -3,10 +3,8 @@
 #define GLEW_STATIC
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-#include "../MainLoop.h"
 #include "MainLoop.h"
 #include <cstdlib>
-
 
 // Default resolutions
 int defaultX = 800;
@@ -74,9 +72,9 @@ void initialiseGLEW() {
 }
 
 /* Set resolution at command line. */
-void setRes(int argc, char **argv) {
+void setRes(int argc, char** argv) {
 	if (argc == 2) {
-		std::cout << "Resolution set at command line." 
+		std::cout << "Resolution set at command line."
 			<< argv[1] << argv[2] << std::endl;
 		defaultX = atoi(argv[1]);
 		defaultY = atoi(argv[2]);
@@ -84,7 +82,7 @@ void setRes(int argc, char **argv) {
 }
 
 /* program entry point, duh. */
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
 	initOpenGL();
 	setRes(argc, argv);
 	auto window = glfwCreateWindow(defaultX, defaultY, "Hello World", NULL, NULL);
