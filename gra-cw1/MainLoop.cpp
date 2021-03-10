@@ -56,14 +56,28 @@ MainLoop::XYZ MainLoop::Plane::calculateCentrePoint() {
 }
 
 MainLoop::XYZ MainLoop::Plane::calculateDirection() {
+	calculateCentrePoint();
 
-	float x = bTop.x - centrePoint.x;
-	float y = bTop.y - centrePoint.y;
-	float z = bTop.z - centrePoint.z;
+	float x = (point.x - centrePoint.x);
+	float y = (point.y - centrePoint.y);
+	float z = (point.z - centrePoint.z);
 
-	//normalize planes forward direction (probabaly a better way to do so but whatever
+	//get planes forward direction (refactor/put in method later)
+	glm::vec3 pDirection = glm::vec3(x,y,z);
 
-	return XYZ(x,y,z);
+	//normalise (for some resason it wouldnt let me do it in one line, also there must be a way to do this without vec3 but whatever)
+	pDirection = glm::normalize(pDirection);
+
+	//put values in an array since it wont let me diretly access vector elements
+	float directionArray[3] = { 0.0 };
+	const float* pSource = (const float*)glm::value_ptr(pDirection);
+
+	std::cout << "direction of plane" << std::endl;
+	std::cout << "X: " << pSource[0] << std::endl;
+	std::cout << "Y: " << pSource[1] << std::endl;
+	std::cout << "Z: " << pSource[2] << std::endl;
+
+	return XYZ(pSource[0], pSource[1], pSource[2]);
 }
 
 
@@ -86,14 +100,11 @@ void MainLoop::drawPlane(Plane p) {
   side effecty.                                                      */
 void MainLoop::handleTransformations(Plane* p) {
 
-	
-
 	// Clockwise around Y
 	if ((keyPress == GLFW_KEY_Q && p->pID == 0) ||
 		(keyPress == GLFW_KEY_U && p->pID == 1)) {
 		MainLoop::keyPress = GLFW_KEY_UNKNOWN;
-		p->calculateCentrePoint();
-		p->calculateDirection();
+		
 		p->yRotate -= 5.f;
 	}
 
@@ -101,8 +112,7 @@ void MainLoop::handleTransformations(Plane* p) {
 	else if ((keyPress == GLFW_KEY_E && p->pID == 0) ||
 		(keyPress == GLFW_KEY_O && p->pID == 1)) {
 		MainLoop::keyPress = GLFW_KEY_UNKNOWN;
-		p->calculateCentrePoint();
-		p->calculateDirection();
+		
 		p->yRotate += 5.f;
 	}
 
@@ -110,8 +120,7 @@ void MainLoop::handleTransformations(Plane* p) {
 	else if ((keyPress == GLFW_KEY_W && p->pID == 0) ||
 		(keyPress == GLFW_KEY_I && p->pID == 1)) {
 		MainLoop::keyPress = GLFW_KEY_UNKNOWN;
-		p->calculateCentrePoint();
-		p->calculateDirection();
+		
 		p->xRotate -= 5.f;
 	}
 
@@ -119,8 +128,7 @@ void MainLoop::handleTransformations(Plane* p) {
 	else if ((keyPress == GLFW_KEY_S && p->pID == 0) ||
 		(keyPress == GLFW_KEY_K && p->pID == 1)) {
 		MainLoop::keyPress = GLFW_KEY_UNKNOWN;
-		p->calculateCentrePoint();
-		p->calculateDirection();
+		
 		p->xRotate += 5.f;
 	}
 
@@ -128,8 +136,7 @@ void MainLoop::handleTransformations(Plane* p) {
 	else if ((keyPress == GLFW_KEY_A && p->pID == 0) ||
 		(keyPress == GLFW_KEY_J && p->pID == 1)) {
 		MainLoop::keyPress = GLFW_KEY_UNKNOWN;
-		p->calculateCentrePoint();
-		p->calculateDirection();
+		
 		p->zRotate -= 5.f;
 	}
 
@@ -137,8 +144,7 @@ void MainLoop::handleTransformations(Plane* p) {
 	else if ((keyPress == GLFW_KEY_D && p->pID == 0) ||
 		(keyPress == GLFW_KEY_L && p->pID == 1)) {
 		MainLoop::keyPress = GLFW_KEY_UNKNOWN;
-		p->calculateCentrePoint();
-		p->calculateDirection();
+		
 		p->zRotate += 5.f;
 	}
 
@@ -146,8 +152,7 @@ void MainLoop::handleTransformations(Plane* p) {
 	else if ((keyPress == GLFW_KEY_F && p->pID == 0) ||
 		(keyPress == GLFW_KEY_H && p->pID == 1)) {
 		MainLoop::keyPress = GLFW_KEY_UNKNOWN;
-		p->calculateCentrePoint();
-		p->calculateDirection();
+		
 		p->translate += 0.1f;
 	}
 
@@ -159,25 +164,44 @@ void MainLoop::handleTransformations(Plane* p) {
 		p->translate = 0.f;
 	}
 
+
 	//apply movement: (actual methods are in reverse to this)
 	//1. translate plane onto axis for translating
 	//2. rotate/translate etc plane
 	//3. translate back to original position by reversing translation
 	if (p->xRotate != 0)
 	{
-		
+		p->calculateDirection();
 		//also need to adjest the rotation by angle form x axis the plane is on
 		glTranslatef(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z);
 		glRotatef(p->xRotate, 1, 0.f, 0.f);
 		glTranslatef(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z));
-		
 	}
 	
 	
 	//glRotatef(p->xRotate, p->centrePoint.x, 0.f, 0.f);
-	glRotatef(p->yRotate, 0.f, p->centrePoint.y, 0.f);
-	glRotatef(p->zRotate, 0.f, 0.f, p->centrePoint.z);
-	glTranslatef(0.0f, 0.0f, p->translate);
+	if (p->yRotate != 0)
+	{
+		p->calculateDirection();
+		glTranslatef(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z);
+		glRotatef(p->yRotate, 0.f, 1, 0.f);
+		glTranslatef(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z));
+	}
+	
+	if (p->zRotate != 0)
+	{
+		p->calculateDirection();
+		glTranslatef(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z);
+		glRotatef(p->zRotate, 0.f, 0.f, 1);
+		glTranslatef(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z));
+	}
+	
+
+	if (p->translate != 0) {
+		p->calculateDirection();
+		glTranslatef(p->direction.x /10, p->direction.y/10, p->direction.z/10);
+	}
+		
 
 	// Re-calculates the centre point of the plane
 	// Note this currently does nothing, as the transforms
