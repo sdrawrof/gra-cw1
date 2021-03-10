@@ -33,7 +33,7 @@ class MainLoop {
 		XYZ bLeft;  // back left
 		XYZ bRight; // back right
 		XYZ bTop;   // back top
-		//XYZ direction;
+		XYZ direction; //plane direction
 
 		float xRotate = 0.f; // Stores the amount rotated in x
 		float yRotate = 0.f; // Stores the amount rotated in y
@@ -41,7 +41,7 @@ class MainLoop {
 		float translate = 0.f; // Stores the amount translated forward
 
 		XYZ calculateCentrePoint();
-		//XYZ calculateDirection();
+		XYZ calculateDirection();
 
 		Plane(const XYZ point, const XYZ bLeft,
 			const XYZ bRight, const XYZ bTop);

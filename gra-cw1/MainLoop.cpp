@@ -49,6 +49,14 @@ MainLoop::XYZ MainLoop::Plane::calculateCentrePoint() {
 	return XYZ(mAverageX, mAverageY, mAverageZ);
 }
 
+MainLoop::XYZ MainLoop::Plane::calculateDirection() {
+
+	float x = bTop.x - centrePoint.x;
+	float y = bTop.y - centrePoint.y;
+	float z = bTop.z - centrePoint.z;
+	return XYZ(x, y, z);
+}
+
 
 /* Draws a plane (just a pyramid shape). */
 void MainLoop::drawPlane(Plane p) {
@@ -156,6 +164,8 @@ MainLoop::XYZ::XYZ(const float x, const float y, const float z)
 MainLoop::Plane::Plane(XYZ point, XYZ bLeft,
 	XYZ bRight, XYZ bTop) :
 	point(point), bLeft(bLeft), bRight(bRight), bTop(bTop),
-	pID(pIDGenerator++), centrePoint(calculateCentrePoint()) {
+	pID(pIDGenerator++), centrePoint(0,0,0), direction(0,0,0) {
 
-}
+	centrePoint = calculateCentrePoint();
+	direction = calculateDirection();
+};
