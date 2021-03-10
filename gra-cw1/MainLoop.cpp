@@ -153,13 +153,9 @@ void MainLoop::handleTransformations(Plane* p) {
 	if (p->xRotate != 0)
 	{
 
-		glTranslatef( 1 -(p->direction.x), -(p->direction.y), -(p->direction.z));
-		p->calculateCentrePoint();
-		p->calculateDirection();
+		//glTranslatef( 1 -(p->direction.x), -(p->direction.y), -(p->direction.z));
 		glRotatef(p->xRotate, p->direction.x, p->direction.y, p->direction.z);
-		p->calculateCentrePoint();
-		p->calculateDirection();
-		glTranslatef(p->direction.x, p->direction.y, p->direction.z);
+		//glTranslatef(p->direction.x, p->direction.y, p->direction.z);
 	}
 	
 	
