@@ -1,5 +1,3 @@
-﻿  Main.cpp
-  MainLoop.cpp
+﻿  MainLoop.cpp
 C:\Users\Adia-May Macheny\source\repos\gra-cw1\gra-cw1\MainLoop.cpp(214,59): error C2512: 'MainLoop::XYZ': no appropriate default constructor available
 C:\Users\Adia-May Macheny\source\repos\gra-cw1\gra-cw1\MainLoop.h(17,8): message : see declaration of 'MainLoop::XYZ'
-  Generating Code...
