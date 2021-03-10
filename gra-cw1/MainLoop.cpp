@@ -169,33 +169,14 @@ void MainLoop::handleTransformations(Plane* p) {
 	//1. translate plane onto axis for translating
 	//2. rotate/translate etc plane
 	//3. translate back to original position by reversing translation
-	if (p->xRotate != 0)
-	{
 		p->calculateDirection();
-		//also need to adjest the rotation by angle form x axis the plane is on
+		//also need to adjust the rotation by angle form x axis the plane is on here
 		glTranslatef(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z);
 		glRotatef(p->xRotate, 1, 0.f, 0.f);
-		glTranslatef(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z));
-	}
-	
-	
-	//glRotatef(p->xRotate, p->centrePoint.x, 0.f, 0.f);
-	if (p->yRotate != 0)
-	{
-		p->calculateDirection();
-		glTranslatef(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z);
 		glRotatef(p->yRotate, 0.f, 1, 0.f);
-		glTranslatef(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z));
-	}
-	
-	if (p->zRotate != 0)
-	{
-		p->calculateDirection();
-		glTranslatef(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z);
 		glRotatef(p->zRotate, 0.f, 0.f, 1);
 		glTranslatef(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z));
-	}
-	
+
 
 	if (p->translate != 0) {
 		p->calculateDirection();
