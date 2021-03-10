@@ -1,5 +1,9 @@
 #include "MainLoop.h"
+#include "glm/ext.hpp"
 #include <math.h>
+#include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
+#include "glm/gtx/string_cast.hpp"
 
 /* The program main loop. */
 void MainLoop::mainLoop(GLFWwindow* const window) {
@@ -13,6 +17,8 @@ void MainLoop::mainLoop(GLFWwindow* const window) {
 		XYZ(0.4f, -0.1f, 0.f),
 		XYZ(0.2f, -0.1f, 0.f),
 		XYZ(0.3f, 0.1f, 0.f));
+
+
 
 	// The main loop
 	while (!glfwWindowShouldClose(window)) {
@@ -54,7 +60,10 @@ MainLoop::XYZ MainLoop::Plane::calculateDirection() {
 	float x = bTop.x - centrePoint.x;
 	float y = bTop.y - centrePoint.y;
 	float z = bTop.z - centrePoint.z;
-	return XYZ(x, y, z);
+
+	//normalize planes forward direction (probabaly a better way to do so but whatever
+
+	return XYZ(x,y,z);
 }
 
 
@@ -76,6 +85,10 @@ void MainLoop::drawPlane(Plane p) {
   Plane is passed in by reference - operations on member variables are
   side effecty.                                                      */
 void MainLoop::handleTransformations(Plane* p) {
+
+	p->calculateCentrePoint();
+	p->calculateDirection();
+
 	// Clockwise around Z
 	if ((keyPress == GLFW_KEY_Q && p->pID == 0) ||
 		(keyPress == GLFW_KEY_U && p->pID == 1)) {
@@ -133,7 +146,24 @@ void MainLoop::handleTransformations(Plane* p) {
 		p->translate = 0.f;
 	}
 
-	glRotatef(p->xRotate, p->centrePoint.x, 0.f, 0.f);
+	//apply movement: (actual methods are in reverse to this)
+	//1. translate plane onto axis for translating
+	//2. rotate/translate etc plane
+	//3. translate back to original position by reversing translation
+	if (p->xRotate != 0)
+	{
+
+		glTranslatef( 1 -(p->direction.x), -(p->direction.y), -(p->direction.z));
+		p->calculateCentrePoint();
+		p->calculateDirection();
+		glRotatef(p->xRotate, p->direction.x, p->direction.y, p->direction.z);
+		p->calculateCentrePoint();
+		p->calculateDirection();
+		glTranslatef(p->direction.x, p->direction.y, p->direction.z);
+	}
+	
+	
+	//glRotatef(p->xRotate, p->centrePoint.x, 0.f, 0.f);
 	glRotatef(p->yRotate, 0.f, p->centrePoint.y, 0.f);
 	glRotatef(p->zRotate, 0.f, 0.f, p->centrePoint.z);
 	glTranslatef(0.0f, 0.0f, p->translate);
