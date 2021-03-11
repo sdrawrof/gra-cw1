@@ -18,7 +18,8 @@ void MainLoop::mainLoop(GLFWwindow* const window) {
 		XYZ(0.2f, -0.1f, 0.f),
 		XYZ(0.3f, 0.1f, 0.f));
 
-
+	glm::mat4x3 planematrix1 = p1.matrix;
+	glm::mat4x3 planematrix2 = p2.matrix;
 
 	// The main loop
 	while (!glfwWindowShouldClose(window)) {
@@ -52,8 +53,15 @@ MainLoop::XYZ MainLoop::Plane::calculateCentrePoint() {
 	float mAverageY = (bAverageY + point.y) / 2.f;
 	float mAverageZ = (bAverageZ + point.z) / 2.f;
 
+	std::cout << "centre point of plane" << std::endl;
+	std::cout << "X: " << mAverageX << std::endl;
+	std::cout << "Y: " << mAverageY << std::endl;
+	std::cout << "Z: " << mAverageZ << std::endl;
+	std::cout << std::endl;
+
 	return XYZ(mAverageX, mAverageY, mAverageZ);
 }
+
 
 MainLoop::XYZ MainLoop::Plane::calculateDirection() {
 	calculateCentrePoint();
@@ -80,6 +88,39 @@ MainLoop::XYZ MainLoop::Plane::calculateDirection() {
 	return XYZ(pSource[0], pSource[1], pSource[2]);
 }
 
+void MainLoop::Plane::updatePlane(glm::vec3 pointV, glm::vec3 leftV, glm::vec3 rightV, glm::vec3 topV) {
+	//use pointer to access vector elements
+	const float* pPoint = (const float*)glm::value_ptr(pointV);
+	const float* pLeft = (const float*)glm::value_ptr(leftV);
+	const float* pRight = (const float*)glm::value_ptr(rightV);
+	const float* pTop = (const float*)glm::value_ptr(topV);
+
+	point.x = pPoint[0];
+	point.y = pPoint[1];
+	point.z = pPoint[2];
+	
+	bLeft.x = pLeft[0];
+	bLeft.y = pLeft[1];
+	bLeft.z = pLeft[2];
+
+	bRight.x = pRight[0];
+	bRight.y = pRight[1];
+	bRight.z = pRight[2];
+
+	bTop.x = pTop[0];
+	bTop.y = pTop[1];
+	bTop.z = pTop[2];
+}
+
+glm::mat4x3 MainLoop::Plane::updatePlaneMatrix() {
+	glm::mat4x3 amatrix = glm::mat4x3(
+		glm::vec3(point.x, point.y, point.z),
+		glm::vec3(bLeft.x, bLeft.y, bLeft.z),
+		glm::vec3(bRight.x, bRight.y, bRight.z),
+		glm::vec3(bTop.x, bTop.y, bTop.z));
+
+	return amatrix;
+}
 
 /* Draws a plane (just a pyramid shape). */
 void MainLoop::drawPlane(Plane p) {
@@ -92,7 +133,17 @@ void MainLoop::drawPlane(Plane p) {
 	drawTriangle(p.bTop, p.bRight, p.point);
 	glColor4f(0.0f, 1.0f, 0.0f, 0.5f); // Green
 	drawTriangle(p.bTop, p.point, p.bLeft);
+
+	//do these change? 
+	//std::cout << "Plane coordinates :" << std::endl;
+	//std::cout << "top : " << p.bTop.x << ", " << p.bTop.y << ", " << p.bTop.z << std::endl;
+	//std::cout << "left : " << p.bLeft.x << ", " << p.bLeft.y << ", " << p.bLeft.z << std::endl;
+	//std::cout << "right : " << p.bRight.x << ", " << p.bRight.y << ", " << p.bRight.z << std::endl;
+	//std::cout << "tip : " << p.point.x << ", " << p.point.y << ", " << p.point.z << std::endl;
+	//std::cout << "centre point : " << p.centrePoint.x << ", " << p.centrePoint.y << ", " << p.centrePoint.z << std::endl;
+	//std::cout << std::endl;
 	glEnd();
+
 }
 
 /* Handles transforming planes (rotating, moving) based on key presses.
@@ -152,7 +203,7 @@ void MainLoop::handleTransformations(Plane* p) {
 	else if ((keyPress == GLFW_KEY_F && p->pID == 0) ||
 		(keyPress == GLFW_KEY_H && p->pID == 1)) {
 		MainLoop::keyPress = GLFW_KEY_UNKNOWN;
-		
+
 		p->translate += 0.1f;
 	}
 
@@ -164,32 +215,40 @@ void MainLoop::handleTransformations(Plane* p) {
 		p->translate = 0.f;
 	}
 
-
 	//apply movement: (actual methods are in reverse to this)
 	//1. translate plane onto axis for translating
 	//2. rotate/translate etc plane
 	//3. translate back to original position by reversing translation
-		p->calculateDirection();
+		//p->calculateDirection();
 		//also need to adjust the rotation by angle form x axis the plane is on here
 		glTranslatef(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z);
 		glRotatef(p->xRotate, 1, 0.f, 0.f);
 		glRotatef(p->yRotate, 0.f, 1, 0.f);
 		glRotatef(p->zRotate, 0.f, 0.f, 1);
 		glTranslatef(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z));
+		glTranslatef((p->direction.x) * p->translate, (p->direction.y) * p->translate, (p->direction.z) * p->translate);
 
+		//in matrix form
+		glm::mat4 centreMatrix = glm::mat4(
+			1.f, 0.f, 0.f, p->centrePoint.x,
+			0.f, 1.f, 0.f, p->centrePoint.y,
+			0.f, 0.f, 1.f, p->centrePoint.z,
+			0.f, 0.f, 0.f, 1.f
+		);
 
-	if (p->translate != 0) {
-		p->calculateDirection();
-		glTranslatef(p->direction.x /10, p->direction.y/10, p->direction.z/10);
-	}
-		
+		glm::mat4 translated = glm::translate(centreMatrix, glm::vec3(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z));
+		glm::mat4 rotationX = glm::rotate(translated, p->xRotate, glm::vec3(1,0.f,0.f));
+		glm::mat4 rotationY = glm::rotate(rotationX, p->yRotate, glm::vec3(0.f, 1, 0.f));
+		glm::mat4 rotationMatrix = glm::rotate(rotationY, p->zRotate, glm::vec3(0.f, 0.f, 1));
+		glm::mat4 reverseTranslated = glm::translate(rotationMatrix, glm::vec3(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z)));
 
-	// Re-calculates the centre point of the plane
-	// Note this currently does nothing, as the transforms
-	// do not alter the bLeft, bTop, bRight or point 
-	// member variables.
-	// To do this a custom transform may need to be implemented?
-	//p->calculateCentrePoint();
+		const float* m = (const float*)glm::value_ptr(rotationMatrix);
+		std::cout << "Rotated point is: " << std::endl;
+		for (int i = 0; i < 16; i++) {
+			std::cout << m[i] << std::endl;
+		}
+		std::cout << std::endl;
+
 }
 
 /* Draws a triangle. */
@@ -210,8 +269,10 @@ MainLoop::XYZ::XYZ(const float x, const float y, const float z)
 MainLoop::Plane::Plane(XYZ point, XYZ bLeft,
 	XYZ bRight, XYZ bTop) :
 	point(point), bLeft(bLeft), bRight(bRight), bTop(bTop),
-	pID(pIDGenerator++), centrePoint(0,0,0), direction(0,0,0) {
+	pID(pIDGenerator++), centrePoint(0, 0, 0), direction(0, 0, 0), matrix{0,0,0,0,0,0,0,0,0,0,0,0} {
 
 	centrePoint = calculateCentrePoint();
 	direction = calculateDirection();
+	matrix = updatePlaneMatrix();
+
 };

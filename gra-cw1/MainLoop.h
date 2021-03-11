@@ -5,6 +5,7 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include <cmath>
+#include <glm/glm.hpp>
 
 
 
@@ -40,8 +41,12 @@ class MainLoop {
 		float zRotate = 0.f; // Stores the amount rotated in z
 		float translate = 0.f; // Stores the amount translated forward
 
+		glm::mat4x3 matrix;
+
 		XYZ calculateCentrePoint();
 		XYZ calculateDirection();
+		void updatePlane(glm::vec3 pointV, glm::vec3 leftV, glm::vec3 rightV, glm::vec3 topV);
+		glm::mat4x3 updatePlaneMatrix();
 
 		Plane(const XYZ point, const XYZ bLeft,
 			const XYZ bRight, const XYZ bTop);
