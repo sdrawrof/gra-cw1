@@ -40,17 +40,13 @@ class MainLoop {
 		float yRotate = 0.f; // Stores the amount rotated in y
 		float zRotate = 0.f; // Stores the amount rotated in z
 		float translate = 0.f; // Stores the amount translated forward
-		float x1 = 0.f;
-		float y1 = 0.f;
-		float z1 = 0.f;
-		float x2 = 0.f;
-		float y2 = 0.f;
-		float z2 = 0.f;
-	
+
+		glm::mat4x3 matrix;
 
 		XYZ calculateCentrePoint();
-		glm::vec3 calculateDirection(float x1, float y1, float z1, float x2, float y2, float z2);
-		
+		XYZ calculateDirection();
+		void updatePlane(glm::vec3 pointV, glm::vec3 leftV, glm::vec3 rightV, glm::vec3 topV);
+		glm::mat4x3 updatePlaneMatrix();
 
 		Plane(const XYZ point, const XYZ bLeft,
 			const XYZ bRight, const XYZ bTop);
