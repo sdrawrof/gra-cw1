@@ -18,8 +18,21 @@ void MainLoop::mainLoop(GLFWwindow* const window) {
 		XYZ(0.2f, -0.1f, 0.f),
 		XYZ(0.3f, 0.1f, 0.f));
 
-	glm::mat4x3 planematrix1 = p1.matrix;
-	glm::mat4x3 planematrix2 = p2.matrix;
+	p1.x1 = 0.f;
+	p1.y1 = 0.f;
+	p1.z1 = 0.5f;
+
+	p1.x2 = 0.f;
+	p1.y2 = 0.1f;
+	p1.z2 = 0.f;
+
+	p2.x1 = 0.3f;
+	p2.y1 = 0.f;
+	p2.z1 = 0.5f;
+
+	p2.x2 = 0.3f;
+	p2.y2 = -0.1f;
+	p2.z2 = 0.f;
 
 	// The main loop
 	while (!glfwWindowShouldClose(window)) {
@@ -53,7 +66,7 @@ MainLoop::XYZ MainLoop::Plane::calculateCentrePoint() {
 	float mAverageY = (bAverageY + point.y) / 2.f;
 	float mAverageZ = (bAverageZ + point.z) / 2.f;
 
-	std::cout << "centre point of plane" << std::endl;
+	std::cout << "centre point of plane " << pID << std::endl;
 	std::cout << "X: " << mAverageX << std::endl;
 	std::cout << "Y: " << mAverageY << std::endl;
 	std::cout << "Z: " << mAverageZ << std::endl;
@@ -63,12 +76,11 @@ MainLoop::XYZ MainLoop::Plane::calculateCentrePoint() {
 }
 
 
-MainLoop::XYZ MainLoop::Plane::calculateDirection() {
-	calculateCentrePoint();
+glm::vec3 MainLoop::Plane::calculateDirection(float x1, float y1, float z1, float x2, float y2, float z2) {
 
-	float x = (point.x - centrePoint.x);
-	float y = (point.y - centrePoint.y);
-	float z = (point.z - centrePoint.z);
+	float x = (x1 - x2);
+	float y = (y1 - y2);
+	float z = (z1 - z2);
 
 	//get planes forward direction (refactor/put in method later)
 	glm::vec3 pDirection = glm::vec3(x,y,z);
@@ -79,48 +91,16 @@ MainLoop::XYZ MainLoop::Plane::calculateDirection() {
 	//use pointer to access vector elements
 	const float* pSource = (const float*)glm::value_ptr(pDirection);
 
-	std::cout << "direction of plane" << std::endl;
+	std::cout << "direction of plane " << pID << std::endl;
 	std::cout << "X: " << pSource[0] << std::endl;
 	std::cout << "Y: " << pSource[1] << std::endl;
 	std::cout << "Z: " << pSource[2] << std::endl;
 	std::cout << std::endl;
 
-	return XYZ(pSource[0], pSource[1], pSource[2]);
+	return pDirection;
 }
 
-void MainLoop::Plane::updatePlane(glm::vec3 pointV, glm::vec3 leftV, glm::vec3 rightV, glm::vec3 topV) {
-	//use pointer to access vector elements
-	const float* pPoint = (const float*)glm::value_ptr(pointV);
-	const float* pLeft = (const float*)glm::value_ptr(leftV);
-	const float* pRight = (const float*)glm::value_ptr(rightV);
-	const float* pTop = (const float*)glm::value_ptr(topV);
 
-	point.x = pPoint[0];
-	point.y = pPoint[1];
-	point.z = pPoint[2];
-	
-	bLeft.x = pLeft[0];
-	bLeft.y = pLeft[1];
-	bLeft.z = pLeft[2];
-
-	bRight.x = pRight[0];
-	bRight.y = pRight[1];
-	bRight.z = pRight[2];
-
-	bTop.x = pTop[0];
-	bTop.y = pTop[1];
-	bTop.z = pTop[2];
-}
-
-glm::mat4x3 MainLoop::Plane::updatePlaneMatrix() {
-	glm::mat4x3 amatrix = glm::mat4x3(
-		glm::vec3(point.x, point.y, point.z),
-		glm::vec3(bLeft.x, bLeft.y, bLeft.z),
-		glm::vec3(bRight.x, bRight.y, bRight.z),
-		glm::vec3(bTop.x, bTop.y, bTop.z));
-
-	return amatrix;
-}
 
 /* Draws a plane (just a pyramid shape). */
 void MainLoop::drawPlane(Plane p) {
@@ -221,34 +201,74 @@ void MainLoop::handleTransformations(Plane* p) {
 	//3. translate back to original position by reversing translation
 		//p->calculateDirection();
 		//also need to adjust the rotation by angle form x axis the plane is on here
+
+	glm::vec3 direction = p->calculateDirection( p->x1, p->y1, p->z1,  p->x2,  p->y2,  p->z2);
 		glTranslatef(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z);
 		glRotatef(p->xRotate, 1, 0.f, 0.f);
 		glRotatef(p->yRotate, 0.f, 1, 0.f);
 		glRotatef(p->zRotate, 0.f, 0.f, 1);
 		glTranslatef(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z));
-		glTranslatef((p->direction.x) * p->translate, (p->direction.y) * p->translate, (p->direction.z) * p->translate);
+		glTranslatef(direction[0] * p->translate, direction[1] * p->translate, direction[2] * p->translate);
 
 		//in matrix form
+		const float* vec = (const float*)glm::value_ptr(direction);
+
 		glm::mat4 centreMatrix = glm::mat4(
-			1.f, 0.f, 0.f, p->centrePoint.x,
-			0.f, 1.f, 0.f, p->centrePoint.y,
-			0.f, 0.f, 1.f, p->centrePoint.z,
+			1.f, 0.f, 0.f, vec[0],
+			0.f, 1.f, 0.f, vec[1],
+			0.f, 0.f, 1.f, vec[2],
 			0.f, 0.f, 0.f, 1.f
 		);
 
-		glm::mat4 translated = glm::translate(centreMatrix, glm::vec3(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z));
-		glm::mat4 rotationX = glm::rotate(translated, p->xRotate, glm::vec3(1,0.f,0.f));
-		glm::mat4 rotationY = glm::rotate(rotationX, p->yRotate, glm::vec3(0.f, 1, 0.f));
-		glm::mat4 rotationMatrix = glm::rotate(rotationY, p->zRotate, glm::vec3(0.f, 0.f, 1));
-		glm::mat4 reverseTranslated = glm::translate(rotationMatrix, glm::vec3(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z)));
+		//glm::mat4 translated = glm::translate(centreMatrix, glm::vec3(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z));
+		glm::mat4 rotationX = glm::rotate(centreMatrix, p->xRotate, glm::vec3(p->x1,0.f,0.f));
+		glm::mat4 rotationY = glm::rotate(rotationX, p->yRotate, glm::vec3(0.f, p->y1, 0.f));
+		glm::mat4 rotationMatrix = glm::rotate(rotationY, p->zRotate, glm::vec3(0.f, 0.f, p->z1));
+		//glm::mat4 reverseTranslated = glm::translate(rotationMatrix, glm::vec3(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z)));
+		glm::mat4 translater = glm::translate(rotationMatrix, glm::vec3(vec[0] * p->translate, vec[1] * p->translate, vec[2] * p->translate));
 
-		const float* m = (const float*)glm::value_ptr(rotationMatrix);
-		std::cout << "Rotated point is: " << std::endl;
-		for (int i = 0; i < 16; i++) {
-			std::cout << m[i] << std::endl;
-		}
-		std::cout << std::endl;
+		
+		glm::vec4 v1 = translater[0];
+		glm::vec4 v2 = translater[1];
+		glm::vec4 v3 = translater[2];
 
+		const float* xVec = (const float*)glm::value_ptr(v1);
+		const float* yVec = (const float*)glm::value_ptr(v2);
+		const float* zVec = (const float*)glm::value_ptr(v3);
+
+		p->x1 = (float) xVec[3];
+		p->y1 = (float) yVec[3];
+		p->z1 = (float) zVec[3];
+
+		//second point
+
+		const float* vecT = (const float*)glm::value_ptr(direction);
+
+		glm::mat4 centreMatrix1 = glm::mat4(
+			1.f, 0.f, 0.f, vecT[0],
+			0.f, 1.f, 0.f, vecT[1],
+			0.f, 0.f, 1.f, vecT[2],
+			0.f, 0.f, 0.f, 1.f
+		);
+
+		//glm::mat4 translated = glm::translate(centreMatrix, glm::vec3(p->centrePoint.x, p->centrePoint.y, p->centrePoint.z));
+		glm::mat4 rotationX1 = glm::rotate(centreMatrix1, p->xRotate, glm::vec3(p->x2, 0.f, 0.f));
+		glm::mat4 rotationY1 = glm::rotate(rotationX1, p->yRotate, glm::vec3(0.f, p->y2, 0.f));
+		glm::mat4 rotationMatrix1 = glm::rotate(rotationY1, p->zRotate, glm::vec3(0.f, 0.f, p->z2));
+		//glm::mat4 reverseTranslated = glm::translate(rotationMatrix, glm::vec3(-(p->centrePoint.x), -(p->centrePoint.y), -(p->centrePoint.z)));
+		glm::mat4 translater1 = glm::translate(rotationMatrix1, glm::vec3(vecT[0] * p->translate, vecT[1] * p->translate, vecT[2] * p->translate));
+
+		glm::vec4 vv1 = translater1[0];
+		glm::vec4 vv2 = translater1[1];
+		glm::vec4 vv3 = translater1[2];
+
+		const float* xVecT = (const float*)glm::value_ptr(vv1);
+		const float* yVecT = (const float*)glm::value_ptr(vv2);
+		const float* zVecT = (const float*)glm::value_ptr(vv3);
+
+		p->x2 = (float) xVecT[3];
+		p->y2 = (float) yVecT[3];
+		p->z2 = (float) zVecT[3];
 }
 
 /* Draws a triangle. */
@@ -269,10 +289,9 @@ MainLoop::XYZ::XYZ(const float x, const float y, const float z)
 MainLoop::Plane::Plane(XYZ point, XYZ bLeft,
 	XYZ bRight, XYZ bTop) :
 	point(point), bLeft(bLeft), bRight(bRight), bTop(bTop),
-	pID(pIDGenerator++), centrePoint(0, 0, 0), direction(0, 0, 0), matrix{0,0,0,0,0,0,0,0,0,0,0,0} {
+	pID(pIDGenerator++), centrePoint(0, 0, 0), direction(0, 0, 0){
 
-	centrePoint = calculateCentrePoint();
-	direction = calculateDirection();
-	matrix = updatePlaneMatrix();
+	//centrePoint = calculateCentrePoint();
+	//direction = calculateDirection();
 
 };
